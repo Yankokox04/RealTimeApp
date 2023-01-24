@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.ResponseCompression;
+using RealTimeApp.Server;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,9 +8,14 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 builder.Services.AddSignalR();
+builder.Services.AddResponseCompression(o => {
+    o.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
+        new[] { "application/octet-stream" }
+        );
+});
 
 var app = builder.Build();
-
+app.UseResponseCompression();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment()) {
     app.UseWebAssemblyDebugging();
@@ -29,6 +35,7 @@ app.UseRouting();
 
 app.MapRazorPages();
 app.MapControllers();
+app.MapHub<TextHub>("/texthub");
 app.MapFallbackToFile("index.html");
 
 app.Run();
